@@ -1,0 +1,288 @@
+/* ---  GLOBAL STYLES & VARIABLES (Copied from login.css) --- */
+:root {
+    --primary-blue: #007bff;
+    --light-blue: #e6f2ff;
+    --dark-blue: #0056b3;
+    --background-color: #f4f7f9;
+    --form-background: #ffffff;
+    --text-color: #333;
+    --label-color: #555;
+    --border-color: #ced4da;
+    --shadow-color: rgba(0, 123, 255, 0.15);
+    --danger-red: #e74c3c;
+    --danger-red-light: #fdeded;
+    --success-green: #2ecc71;
+}
+
+body {
+    font-family: 'Roboto', sans-serif;
+    background-color: var(--background-color);
+    color: var(--text-color);
+    margin: 0;
+    padding: 0;
+}
+
+/* --- Main Header / Navbar --- */
+.main-header {
+    background-color: var(--form-background);
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
+    padding: 1rem 2.5rem;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    position: sticky;
+    top: 0;
+    z-index: 1000;
+}
+
+.logo {
+    font-size: 1.75rem;
+    font-weight: 700;
+    color: var(--primary-blue);
+    cursor: pointer;
+}
+
+.main-nav {
+    display: flex;
+    gap: 2rem;
+}
+
+.main-nav a {
+    text-decoration: none;
+    color: var(--label-color);
+    font-weight: 500;
+    padding-bottom: 0.5rem;
+    border-bottom: 3px solid transparent;
+    transition: color 0.2s ease, border-color 0.2s ease;
+}
+
+.main-nav a:hover {
+    color: var(--primary-blue);
+}
+
+.main-nav a.active {
+    color: var(--primary-blue);
+    border-bottom-color: var(--primary-blue);
+}
+
+.user-info {
+    display: flex;
+    align-items: center;
+    gap: 1.5rem;
+}
+
+.user-info span {
+    color: var(--text-color);
+    font-size: 0.9rem;
+}
+
+.logout-btn {
+    background-color: var(--light-blue);
+    color: var(--primary-blue);
+    border: 1px solid var(--primary-blue);
+    padding: 0.5rem 1rem;
+    border-radius: 6px;
+    text-decoration: none;
+    font-weight: 500;
+    font-size: 0.9rem;
+    transition: background-color 0.2s ease, color 0.2s ease;
+}
+
+.logout-btn:hover {
+    background-color: var(--primary-blue);
+    color: white;
+}
+
+/* --- Dashboard Grid Layout --- */
+.dashboard-container {
+    padding: 2.5rem;
+    display: grid;
+    /* This creates a 2-column layout */
+    grid-template-columns: 1fr 1fr;
+    gap: 2rem;
+}
+
+/* --- Base Card Style (Used by all widgets) --- */
+.card {
+    background-color: var(--form-background);
+    border-radius: 12px;
+    box-shadow: 0 8px 30px rgba(0, 0, 0, 0.07);
+    padding: 2rem;
+}
+
+.card h2 {
+    color: var(--primary-blue);
+    margin-top: 0;
+    margin-bottom: 1.5rem;
+    padding-bottom: 1rem;
+    border-bottom: 1px solid #eee;
+}
+
+/* --- Card 1: Profile Card --- */
+.profile-card .data-item {
+    margin-bottom: 1.25rem;
+}
+
+.profile-card .data-item label {
+    display: block;
+    font-weight: 500;
+    color: var(--label-color);
+    font-size: 0.9rem;
+    margin-bottom: 0.25rem;
+}
+
+.profile-card .data-item span {
+    font-size: 1.1rem;
+    color: var(--text-color);
+    font-weight: 500;
+}
+
+/* --- Card 2: Time Card --- */
+.time-card .status {
+    display: flex;
+    align-items: center;
+    font-size: 1.25rem;
+    font-weight: 700;
+    color: var(--success-green);
+    margin-bottom: 1.5rem;
+}
+
+.time-card .status-dot {
+    width: 12px;
+    height: 12px;
+    background-color: var(--success-green);
+    border-radius: 50%;
+    margin-right: 0.75rem;
+    /* Simple pulse animation */
+    animation: pulse 1.5s infinite ease-in-out;
+}
+
+.time-card .data-item {
+    margin-bottom: 1.25rem;
+}
+
+.time-card .data-item label {
+    display: block;
+    font-weight: 500;
+    color: var(--label-color);
+    font-size: 0.9rem;
+}
+
+.time-card .data-item span {
+    font-size: 2rem;
+    font-weight: 700;
+}
+
+.time-card .time-entry {
+    color: var(--success-green);
+}
+
+.time-card .time-exit {
+    color: #aaa;
+}
+
+
+/* --- Card 3: Warnings Card --- */
+/* This card spans the full width of the grid */
+.warnings-card {
+    grid-column: 1 / -1;
+}
+
+.warning-list {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+}
+
+.warning-item {
+    border: 1px solid var(--border-color);
+    border-radius: 8px;
+    padding: 1.5rem;
+    margin-bottom: 1rem;
+    transition: box-shadow 0.2s ease;
+}
+
+.warning-item:hover {
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.08);
+}
+
+.warning-item h3 {
+    margin-top: 0;
+    margin-bottom: 0.5rem;
+    color: var(--text-color);
+}
+
+.warning-item .meta {
+    font-size: 0.85rem;
+    color: var(--label-color);
+    margin-bottom: 0.75rem;
+}
+
+.warning-item p {
+    margin: 0;
+    line-height: 1.6;
+}
+
+/* Style for the important warnings */
+.warning-item.high-priority {
+    background-color: var(--danger-red-light);
+    border-color: var(--danger-red);
+    border-left-width: 5px;
+}
+
+.warning-item.high-priority h3 {
+    color: var(--danger-red);
+}
+
+
+/* --- Responsive Design --- */
+@media (max-width: 1024px) {
+
+    /* Stack the first two cards on top of each other */
+    .dashboard-container {
+        grid-template-columns: 1fr;
+    }
+}
+
+@media (max-width: 768px) {
+    .main-header {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 1rem;
+        padding: 1.5rem;
+    }
+
+    .main-nav {
+        gap: 1rem;
+        flex-wrap: wrap;
+    }
+
+    .user-info {
+        width: 100%;
+        justify-content: space-between;
+    }
+
+    .dashboard-container {
+        padding: 1.5rem;
+        gap: 1.5rem;
+    }
+
+    .card {
+        padding: 1.5rem;
+    }
+}
+
+/* Simple pulse animation for status dot */
+@keyframes pulse {
+    0% {
+        box-shadow: 0 0 0 0 rgba(46, 204, 113, 0.7);
+    }
+
+    70% {
+        box-shadow: 0 0 0 10px rgba(46, 204, 113, 0);
+    }
+
+    100% {
+        box-shadow: 0 0 0 0 rgba(46, 204, 113, 0);
+    }
+}

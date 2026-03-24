@@ -1,0 +1,44 @@
+{% load static %}
+<!DOCTYPE html>
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta
+      name="description"
+      content="SKYsafe is a company that provides a safe and secure for the Airport."
+    />
+    <link  href="{% static 'css/landing.css' %}" rel="stylesheet" />
+   <link rel="preconnect" href="https://fonts.googleapis.com">
+   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+   <link href="https://fonts.googleapis.com/css2?family=Archivo+Black&family=Bungee&display=swap" rel="stylesheet">
+    <title>SKYsafe</title>
+  </head>
+
+  <body>
+    
+    <div class="video">
+      <video src="{% static 'video/video.mp4' %}" autoplay loop muted></video>
+    </div>
+    <div class="content">
+      <h1 class="title">SKYsafe</h1>
+      <p>
+        SKYsafe is a company that provides a safe and secure for the Airport.
+      </p>
+
+      <span>
+      <a href="{% url 'signup' %}"><button id="myBtn">SIGN UP</button></a>
+      </span>
+      <span>
+        <a href="{% url 'login' %}"><button id="myBtn">Employee Login</button></a>
+      </span>
+      <span>
+        <a href="{% url 'admin_login' %}"><button id="myBtn">Admin Login</button></a>
+      </span>
+
+    </div>
+  </body>
+
+  <footer>
+    <p>&copy; 2025 SKYsafe. All rights reserved.</p>
+  </footer>
+</html>

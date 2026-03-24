@@ -1,0 +1,289 @@
+{% load static %}
+<!DOCTYPE html>
+
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta name="description" content="SKYsafe Admin Dashboard" />
+    <link  href="{% static 'css/dashboard.css' %}?v=3" rel="stylesheet"/>
+    <title>SKYsafe - Admin Dashboard</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;500;700&display=swap" rel="stylesheet">
+    <style>
+        /* Notification bell (shared with control panel) */
+        .notif-wrapper{position:relative}
+        .notif-bell{background:none;border:none;cursor:pointer;font-size:1.4rem;position:relative;padding:.25rem;color:#555;transition:color .2s}
+        .notif-bell:hover{color:#007bff}
+        .notif-badge{position:absolute;top:-4px;right:-6px;background:#e74c3c;color:#fff;font-size:.65rem;font-weight:700;border-radius:50%;width:18px;height:18px;display:flex;align-items:center;justify-content:center}
+        .notif-dropdown{display:none;position:absolute;top:calc(100% + 10px);right:0;width:340px;background:#fff;border-radius:10px;box-shadow:0 8px 30px rgba(0,0,0,.12);z-index:2000;overflow:hidden}
+        .notif-dropdown.open{display:block}
+        .notif-header{padding:.75rem 1rem;font-weight:600;font-size:.9rem;color:#fff;background:#007bff}
+        .notif-list{max-height:280px;overflow-y:auto}
+        .notif-item{padding:.6rem 1rem;border-bottom:1px solid #f0f0f0;font-size:.85rem}
+        .notif-item:last-child{border-bottom:none}
+        .notif-item .tag{font-weight:700;color:#007bff;margin-right:.4rem}
+        .notif-empty{padding:1rem;text-align:center;color:#555;font-size:.9rem}
+        /* Toast */
+        #toast-container{position:fixed;bottom:2rem;right:2rem;z-index:9999;display:flex;flex-direction:column;gap:.75rem;pointer-events:none}
+        .toast{background:#1e293b;color:#fff;padding:.85rem 1.2rem;border-radius:10px;font-size:.88rem;box-shadow:0 8px 24px rgba(0,0,0,.25);display:flex;align-items:center;gap:.7rem;animation:slideUp .3s ease;border-left:4px solid #007bff;pointer-events:all;max-width:340px}
+        .toast.toast-danger{border-left-color:#e74c3c}
+        .toast.toast-warn{border-left-color:#f39c12}
+        @keyframes slideUp{from{transform:translateY(20px);opacity:0}to{transform:translateY(0);opacity:1}}
+        /* Crowded gate row colors */
+        .crowded-gate-card .device-item[data-crowd="CRITICAL"]{background-color:#fff0f0!important;border-left:4px solid #e74c3c!important;padding-left:.75rem;border-radius:6px}
+        .crowded-gate-card .device-item[data-crowd="HIGH"]{background-color:#fff8ec!important;border-left:4px solid #f39c12!important;padding-left:.75rem;border-radius:6px}
+        .crowded-gate-card .device-item[data-crowd="MODERATE"]{background-color:#f0faf2!important;border-left:4px solid #27ae60!important;padding-left:.75rem;border-radius:6px}
+        .crowded-gate-card .device-item[data-crowd="LOW"]{background-color:#edf5ff!important;border-left:4px solid #007bff!important;padding-left:.75rem;border-radius:6px}
+    </style>
+</head>
+<body>
+<div id="toast-container"></div>
+
+    <!-- --- Main Header / Navbar (Consistent with other pages) --- -->
+    <header class="main-header">
+        <div class="logo">SKYsafe</div>
+        <nav class="main-nav">
+            <a href="#" class="active">Admin Dashboard</a>
+            <a href="{% url 'admin_employees' %}">Employees Management</a>
+            <a href="{% url 'admin_control' %}">Control Panel</a>
+        </nav>
+        <div class="user-info">
+            <!-- Notification Bell -->
+            <div class="notif-wrapper" id="notifWrapper">
+                <button class="notif-bell" id="notifBell" title="Notifications">🔔
+                    <span class="notif-badge" id="notifBadge" style="display:none">0</span>
+                </button>
+                <div class="notif-dropdown" id="notifDropdown">
+                    <div class="notif-header">Recent Alerts</div>
+                    <div class="notif-list" id="notifList">
+                        <div class="notif-empty" id="notifEmpty">No new alerts</div>
+                    </div>
+                </div>
+            </div>
+            <span>Welcome, <strong>Admin</strong></span>
+            <a href="{% url 'admin_logout' %}" class="logout-btn">Logout</a>
+        </div>
+    </header>
+
+    <!-- --- Main Dashboard Content --- -->
+    <main class="dashboard-container">
+
+        <!-- --- Top Row: Quick Stats --- -->
+        <div class="stats-bar">
+            <div class="stat-card">
+                <div class="stat-icon threat">
+                    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor"><path d="M12 2.25c.967 0 1.915.099 2.834.293 3.421.727 6.166 3.472 6.893 6.893.194.919.293 1.867.293 2.834 0 .967-.099 1.915-.293 2.834-.727 3.421-3.472 6.166-6.893 6.893-.919.194-1.867.293-2.834.293-.967 0-1.915-.099-2.834-.293-3.421-.727-6.166-3.472-6.893-6.893-.194-.919-.293-1.867-.293-2.834 0-.967.099-1.915.293-2.834.727-3.421 3.472-6.166 6.893-6.893.919-.194 1.867-.293 2.834-.293zM12 1.5A10.5 10.5 0 0 0 1.5 12c0 3.774 1.98 7.07 4.887 8.944L12 22.5l5.613-1.556A10.45 10.45 0 0 0 22.5 12c0-5.799-4.701-10.5-10.5-10.5z"/></svg>
+                </div>
+                <div class="stat-info">
+                    <label>Active Threats</label>
+                    <span class="value high-priority-text">{{ cyber_threats|length }}</span>
+                </div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-icon iot">
+                    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor"><path d="M3.375 3C2.339 3 1.5 3.84 1.5 4.875v14.25C1.5 20.16 2.34 21 3.375 21H20.625c1.035 0 1.875-.84 1.875-1.875V4.875C22.5 3.839 21.66 3 20.625 3H3.375zM4.5 6.75h15v10.5h-15V6.75zM6 8.25a.75.75 0 0 0 0 1.5h3a.75.75 0 0 0 0-1.5H6z"/></svg>
+                </div>
+                <div class="stat-info">
+                    <label>IoT Devices Online</label>
+                    <span class="value">{{ iot_devices|length }}</span>
+                </div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-icon camera">
+                    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor"><path d="M1.5 6h21v12H1.5V6zM0 6a1.5 1.5 0 0 1 1.5-1.5h21A1.5 1.5 0 0 1 24 6v12a1.5 1.5 0 0 1-1.5 1.5h-21A1.5 1.5 0 0 1 0 18V6zM15 12a3 3 0 1 1-6 0 3 3 0 0 1 6 0zM12 13.5a1.5 1.5 0 1 0 0-3 1.5 1.5 0 0 0 0 3z"/></svg>
+                </div>
+                <div class="stat-info">
+                    <label>Camera Log Entries</label>
+                    <span class="value">{{ camera_logs|length }}</span>
+                </div>
+            </div>
+        </div>
+        
+        <!-- --- Main Dashboard Grid --- -->
+        <div class="dashboard-grid">
+
+            <!-- --- Card 1: Live Camera Stream --- -->
+            <div class="card live-stream-card">
+                <h2>Live Camera Feeds</h2>
+                <div class="stream-grid">
+                    <div class="video-feed">
+                        <img src="https://placehold.co/400x300/1a1a1a/f0f0f0?text=Terminal+1+%28C1%29" alt="Live feed from Terminal 1 Gate C1">
+                        <div class="feed-label">CAM 01: Terminal 1 (Gate C1)</div>
+                    </div>
+                    <div class="video-feed">
+                        <img src="https://placehold.co/400x300/1a1a1a/f0f0f0?text=Terminal+1+%28Baggage%29" alt="Live feed from Terminal 1 Baggage Claim">
+                        <div class="feed-label">CAM 02: Terminal 1 (Baggage)</div>
+                    </div>
+                    <div class="video-feed">
+                        <img src="https://placehold.co/400x300/1a1a1a/f0f0f0?text=Terminal+2+%28Security%29" alt="Live feed from Terminal 2 Security">
+                        <div class="feed-label">CAM 03: Terminal 2 (Security)</div>
+                    </div>
+                    <div class="video-feed">
+                        <img src="https://placehold.co/400x300/1a1a1a/f0f0f0?text=Datacenter" alt="Live feed from Datacenter">
+                        <div class="feed-label">CAM 04: Datacenter</div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- --- Card 2: Cyber Threats --- -->
+            <div class="card cyber-threats-card">
+                <h2>Cyber Threat Monitor</h2>
+                <ul class="log-feed">
+                    {% for t in cyber_threats %}
+                    <li class="log-item">
+                        <span class="timestamp">{{ t.fmt_time }}</span>
+                        <span class="severity {{ t.severity|lower }}" data-severity="{{ t.severity }}">{{ t.severity }}</span>
+                        <span class="message">{{ t.message }}</span>
+                    </li>
+                    {% empty %}
+                    <li class="log-item"><span class="message" style="color:#999">No threats recorded.</span></li>
+                    {% endfor %}
+                </ul>
+            </div>
+
+            <!-- --- Card 3: IoT Hardware Status --- -->
+            <div class="card iot-status-card">
+                <h2>IoT Hardware Status</h2>
+                <ul class="device-list">
+                    {% for d in iot_devices %}
+                    <li class="device-item">
+                        <span class="device-name">{{ d.device_name }}</span>
+                        <span class="status-dot" data-status="{{ d.status }}">{{ d.status }}</span>
+                    </li>
+                    {% empty %}
+                    <li class="device-item"><span class="device-name" style="color:#999">No devices.</span></li>
+                    {% endfor %}
+                </ul>
+            </div>
+
+            <!-- --- Card 4: Camera Access Log --- -->
+            <div class="card access-log-card">
+                <h2>Smart Camera Access Log</h2>
+                <ul class="log-feed">
+                    {% for c in camera_logs %}
+                    <li class="log-item">
+                        <span class="timestamp">{{ c.fmt_time }}</span>
+                        <span class="user">User: <strong>{{ c.user_display }}</strong></span>
+                        <span class="message">{{ c.action }} Feed: {{ c.feed_name }}</span>
+                    </li>
+                    {% empty %}
+                    <li class="log-item"><span class="message" style="color:#999">No access logs.</span></li>
+                    {% endfor %}
+                </ul>
+            </div>
+
+            <!-- --- Card 5: Fire Detection Alerts --- -->
+            <div class="card fire-detection-card">
+                <h2>🔥 Fire Detection Alerts</h2>
+                <ul class="log-feed">
+                    {% for f in fire_alerts %}
+                    <li class="log-item">
+                        <span class="timestamp">{{ f.fmt_time }}</span>
+                        <span class="severity {{ f.severity|lower }}" data-severity="{{ f.severity }}">{{ f.severity }}</span>
+                        <span class="message">{{ f.message }}</span>
+                    </li>
+                    {% empty %}
+                    <li class="log-item"><span class="message" style="color:#999">No fire alerts.</span></li>
+                    {% endfor %}
+                </ul>
+            </div>
+
+            <!-- --- Card 6: Crowded Gate Detection --- -->
+            <div class="card crowded-gate-card">
+                <h2>🚶 Crowded Gate Detection</h2>
+                <ul class="device-list">
+                    {% for g in crowded_gates %}
+                    <li class="device-item" data-crowd="{{ g.crowd_level }}">
+                        <span class="device-name">{{ g.gate_name }}</span>
+                        <span class="crowd-badge" data-crowd="{{ g.crowd_level }}">{{ g.crowd_level }} ({{ g.count }})</span>
+                    </li>
+                    {% empty %}
+                    <li class="device-item"><span class="device-name" style="color:#999">No gate data.</span></li>
+                    {% endfor %}
+                </ul>
+            </div>
+
+            <!-- --- Card 7: Smoker Detection --- -->
+            <div class="card smoker-detection-card">
+                <h2>🚬 Smoker Detection</h2>
+                <ul class="log-feed">
+                    {% for s in smoker_alerts %}
+                    <li class="log-item">
+                        <span class="timestamp">{{ s.fmt_time }}</span>
+                        <span class="severity {{ s.severity|lower }}" data-severity="{{ s.severity }}">{{ s.severity }}</span>
+                        <span class="message">{{ s.message }}</span>
+                    </li>
+                    {% empty %}
+                    <li class="log-item"><span class="message" style="color:#999">No smoker alerts.</span></li>
+                    {% endfor %}
+                </ul>
+            </div>
+
+            <!-- --- Card 8: Passport Recognition --- -->
+            <div class="card passport-recognition-card">
+                <h2>🛂 Passport Recognition</h2>
+                <ul class="log-feed">
+                    {% for p in passport_events %}
+                    <li class="log-item">
+                        <span class="timestamp">{{ p.fmt_time }}</span>
+                        <span class="severity {{ p.status|lower }}" data-severity="{{ p.status }}">{{ p.status }}</span>
+                        <span class="message">{{ p.passport_id }} — {{ p.message }}</span>
+                    </li>
+                    {% empty %}
+                    <li class="log-item"><span class="message" style="color:#999">No passport events.</span></li>
+                    {% endfor %}
+                </ul>
+            </div>
+
+        </div>
+    </main>
+
+<script>
+/* ── Notification bell + polling ──────────────────────────────────────── */
+const bell      = document.getElementById('notifBell');
+const badge     = document.getElementById('notifBadge');
+const dropdown  = document.getElementById('notifDropdown');
+const notifList = document.getElementById('notifList');
+const notifEmpty= document.getElementById('notifEmpty');
+let allNotifs = [];
+
+bell.addEventListener('click', e => { e.stopPropagation(); dropdown.classList.toggle('open'); });
+document.addEventListener('click', e => { if (!dropdown.contains(e.target) && e.target !== bell) dropdown.classList.remove('open'); });
+
+function showToast(html, type='info'){
+    const c=document.getElementById('toast-container');
+    const t=document.createElement('div');
+    t.className='toast'+(type==='danger'?' toast-danger':type==='warn'?' toast-warn':'');
+    t.innerHTML=html;
+    c.appendChild(t);
+    setTimeout(()=>t.remove(),5000);
+}
+
+async function pollNotifications(){
+    try {
+        const res  = await fetch('/manage/api/notifications/');
+        const data = await res.json();
+        if(data.count > 0){
+            data.items.forEach(item => {
+                allNotifs.push(item);
+                const icon = item.label.includes('Fire')?'🔥':item.label.includes('Smoker')?'🚬':item.label.includes('Passport')?'🛂':item.label.includes('Crowd')?'🚶':item.label.includes('Cyber')?'🛡️':'🔔';
+                showToast(`<span style="font-size:1.1rem">${icon}</span> <span><strong>${item.label}:</strong> ${item.text}</span>`,
+                    item.text.includes('HIGH')||item.text.includes('CRITICAL')?'danger':'warn');
+                const el=document.createElement('div');
+                el.className='notif-item';
+                el.innerHTML=`<span class="tag">${item.label}</span>${item.text}`;
+                notifList.insertBefore(el, notifEmpty);
+            });
+            badge.textContent = allNotifs.length;
+            badge.style.display = 'flex';
+            notifEmpty.style.display = 'none';
+        }
+    } catch(e){}
+}
+
+setInterval(pollNotifications, 5000);
+pollNotifications();
+</script>
+</body>
+</html>

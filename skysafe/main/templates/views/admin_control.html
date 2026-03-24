@@ -1,0 +1,841 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta name="description" content="SKYsafe Admin Control Panel" />
+    <title>SKYsafe — Control Panel</title>
+    <link href="{% static 'css/admin_control.css' %}?v=1" rel="stylesheet" />
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;500;700&display=swap" rel="stylesheet">
+</head>
+<body>
+
+<!-- ── Header ────────────────────────────────────────────────────────────── -->
+<header class="main-header">
+    <div class="logo">SKYsafe</div>
+    <nav class="main-nav">
+        <a href="{% url 'dashboard' %}">Admin Dashboard</a>
+        <a href="{% url 'admin_employees' %}">Employees</a>
+        <a href="{% url 'admin_control' %}" class="active">Control Panel</a>
+    </nav>
+    <div class="header-right">
+        <!-- Notification Bell -->
+        <div class="notif-wrapper" id="notifWrapper">
+            <button class="notif-bell" id="notifBell" title="Notifications">🔔
+                <span class="notif-badge" id="notifBadge">0</span>
+            </button>
+            <div class="notif-dropdown" id="notifDropdown">
+                <div class="notif-header">Recent Alerts</div>
+                <div class="notif-list" id="notifList">
+                    <div class="notif-empty" id="notifEmpty">No new alerts</div>
+                </div>
+            </div>
+        </div>
+        <div class="user-info">
+            <span>Welcome, <strong>Admin</strong></span>
+            <a href="{% url 'admin_logout' %}" class="logout-btn">Logout</a>
+        </div>
+    </div>
+</header>
+
+<!-- ── Toast container ───────────────────────────────────────────────────── -->
+<div id="toast-container"></div>
+
+<!-- ── Main content ─────────────────────────────────────────────────────── -->
+<main class="control-container">
+    <h1 class="page-title">Dashboard <span>Control Panel</span></h1>
+
+    <!-- ═══════════════════════════════════════════════════════════════════ -->
+    <!-- 1. Cyber Threats                                                   -->
+    <!-- ═══════════════════════════════════════════════════════════════════ -->
+    <div class="section-card" id="sec-cyber">
+        <div class="section-header" onclick="toggleSection('sec-cyber')">
+            <h2>🛡️ Cyber Threat Monitor</h2>
+            <i class="chevron">▼</i>
+        </div>
+        <div class="section-body">
+            <div class="section-toolbar">
+                <button class="btn-add" onclick="openModal('cyberModal')">+ Add Entry</button>
+            </div>
+            <table class="data-table">
+                <thead><tr><th>#</th><th>Severity</th><th>Message</th><th>Actions</th></tr></thead>
+                <tbody id="cyberTbody">
+                {% for t in cyber_threats %}
+                <tr id="cyber-row-{{ t.id }}">
+                    <td>{{ t.id }}</td>
+                    <td><span class="pill pill-{{ t.severity }}">{{ t.severity }}</span></td>
+                    <td>{{ t.message }}</td>
+                    <td>
+                        <button class="btn-edit" onclick="editCyber({{ t.id }},'{{ t.severity }}','{{ t.message|escapejs }}')">Edit</button>
+                        <button class="btn-delete" onclick="deleteRow('/manage/api/cyber/{{ t.id }}/delete/','cyber-row-{{ t.id }}')">Delete</button>
+                    </td>
+                </tr>
+                {% empty %}
+                <tr class="empty-row"><td colspan="4">No entries yet</td></tr>
+                {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+    <!-- ═══════════════════════════════════════════════════════════════════ -->
+    <!-- 2. IoT Devices                                                     -->
+    <!-- ═══════════════════════════════════════════════════════════════════ -->
+    <div class="section-card" id="sec-iot">
+        <div class="section-header" onclick="toggleSection('sec-iot')">
+            <h2>📡 IoT Hardware Status</h2>
+            <i class="chevron">▼</i>
+        </div>
+        <div class="section-body">
+            <div class="section-toolbar">
+                <button class="btn-add" onclick="openModal('iotModal')">+ Add Device</button>
+            </div>
+            <table class="data-table">
+                <thead><tr><th>#</th><th>Device Name</th><th>Status</th><th>Actions</th></tr></thead>
+                <tbody id="iotTbody">
+                {% for d in iot_devices %}
+                <tr id="iot-row-{{ d.id }}">
+                    <td>{{ d.id }}</td>
+                    <td>{{ d.device_name }}</td>
+                    <td><span class="pill pill-{{ d.status }}">{{ d.status }}</span></td>
+                    <td>
+                        <button class="btn-edit" onclick="editIot({{ d.id }},'{{ d.device_name|escapejs }}','{{ d.status }}')">Edit</button>
+                        <button class="btn-delete" onclick="deleteRow('/manage/api/iot/{{ d.id }}/delete/','iot-row-{{ d.id }}')">Delete</button>
+                    </td>
+                </tr>
+                {% empty %}
+                <tr class="empty-row"><td colspan="4">No devices yet</td></tr>
+                {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+    <!-- ═══════════════════════════════════════════════════════════════════ -->
+    <!-- 3. Camera Access Log                                               -->
+    <!-- ═══════════════════════════════════════════════════════════════════ -->
+    <div class="section-card" id="sec-camera">
+        <div class="section-header" onclick="toggleSection('sec-camera')">
+            <h2>📷 Camera Access Log</h2>
+            <i class="chevron">▼</i>
+        </div>
+        <div class="section-body">
+            <div class="section-toolbar">
+                <button class="btn-add" onclick="openModal('cameraModal')">+ Add Entry</button>
+            </div>
+            <table class="data-table">
+                <thead><tr><th>#</th><th>User</th><th>Action</th><th>Feed</th><th>Actions</th></tr></thead>
+                <tbody id="cameraTbody">
+                {% for c in camera_logs %}
+                <tr id="camera-row-{{ c.id }}">
+                    <td>{{ c.id }}</td>
+                    <td>{{ c.user_display }}</td>
+                    <td>{{ c.action }}</td>
+                    <td>{{ c.feed_name }}</td>
+                    <td>
+                        <button class="btn-edit" onclick="editCamera({{ c.id }},'{{ c.user_display|escapejs }}','{{ c.action }}','{{ c.feed_name|escapejs }}')">Edit</button>
+                        <button class="btn-delete" onclick="deleteRow('/manage/api/camera/{{ c.id }}/delete/','camera-row-{{ c.id }}')">Delete</button>
+                    </td>
+                </tr>
+                {% empty %}
+                <tr class="empty-row"><td colspan="5">No entries yet</td></tr>
+                {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+    <!-- ═══════════════════════════════════════════════════════════════════ -->
+    <!-- 4. Fire Detection                                                  -->
+    <!-- ═══════════════════════════════════════════════════════════════════ -->
+    <div class="section-card" id="sec-fire">
+        <div class="section-header" onclick="toggleSection('sec-fire')">
+            <h2>🔥 Fire Detection Alerts</h2>
+            <i class="chevron">▼</i>
+        </div>
+        <div class="section-body">
+            <div class="section-toolbar">
+                <button class="btn-add" onclick="openModal('fireModal')">+ Add Alert</button>
+            </div>
+            <table class="data-table">
+                <thead><tr><th>#</th><th>Severity</th><th>Message</th><th>Actions</th></tr></thead>
+                <tbody id="fireTbody">
+                {% for f in fire_alerts %}
+                <tr id="fire-row-{{ f.id }}">
+                    <td>{{ f.id }}</td>
+                    <td><span class="pill pill-{{ f.severity }}">{{ f.severity }}</span></td>
+                    <td>{{ f.message }}</td>
+                    <td>
+                        <button class="btn-edit" onclick="editFire({{ f.id }},'{{ f.severity }}','{{ f.message|escapejs }}')">Edit</button>
+                        <button class="btn-delete" onclick="deleteRow('/manage/api/fire/{{ f.id }}/delete/','fire-row-{{ f.id }}')">Delete</button>
+                    </td>
+                </tr>
+                {% empty %}
+                <tr class="empty-row"><td colspan="4">No alerts yet</td></tr>
+                {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+    <!-- ═══════════════════════════════════════════════════════════════════ -->
+    <!-- 5. Crowded Gate Detection                                          -->
+    <!-- ═══════════════════════════════════════════════════════════════════ -->
+    <div class="section-card" id="sec-crowd">
+        <div class="section-header" onclick="toggleSection('sec-crowd')">
+            <h2>🚶 Crowded Gate Detection</h2>
+            <i class="chevron">▼</i>
+        </div>
+        <div class="section-body">
+            <div class="section-toolbar">
+                <button class="btn-add" onclick="openModal('crowdModal')">+ Add Gate</button>
+            </div>
+            <table class="data-table">
+                <thead><tr><th>#</th><th>Gate Name</th><th>Crowd Level</th><th>Count</th><th>Actions</th></tr></thead>
+                <tbody id="crowdTbody">
+                {% for g in crowded_gates %}
+                <tr id="crowd-row-{{ g.id }}">
+                    <td>{{ g.id }}</td>
+                    <td>{{ g.gate_name }}</td>
+                    <td><span class="pill pill-{{ g.crowd_level }}">{{ g.crowd_level }}</span></td>
+                    <td>{{ g.count }}</td>
+                    <td>
+                        <button class="btn-edit" onclick="editCrowd({{ g.id }},'{{ g.gate_name|escapejs }}','{{ g.crowd_level }}',{{ g.count }})">Edit</button>
+                        <button class="btn-delete" onclick="deleteRow('/manage/api/crowd/{{ g.id }}/delete/','crowd-row-{{ g.id }}')">Delete</button>
+                    </td>
+                </tr>
+                {% empty %}
+                <tr class="empty-row"><td colspan="5">No gates yet</td></tr>
+                {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+    <!-- ═══════════════════════════════════════════════════════════════════ -->
+    <!-- 6. Smoker Detection                                                -->
+    <!-- ═══════════════════════════════════════════════════════════════════ -->
+    <div class="section-card" id="sec-smoker">
+        <div class="section-header" onclick="toggleSection('sec-smoker')">
+            <h2>🚬 Smoker Detection</h2>
+            <i class="chevron">▼</i>
+        </div>
+        <div class="section-body">
+            <div class="section-toolbar">
+                <button class="btn-add" onclick="openModal('smokerModal')">+ Add Alert</button>
+            </div>
+            <table class="data-table">
+                <thead><tr><th>#</th><th>Severity</th><th>Message</th><th>Actions</th></tr></thead>
+                <tbody id="smokerTbody">
+                {% for s in smoker_alerts %}
+                <tr id="smoker-row-{{ s.id }}">
+                    <td>{{ s.id }}</td>
+                    <td><span class="pill pill-{{ s.severity }}">{{ s.severity }}</span></td>
+                    <td>{{ s.message }}</td>
+                    <td>
+                        <button class="btn-edit" onclick="editSmoker({{ s.id }},'{{ s.severity }}','{{ s.message|escapejs }}')">Edit</button>
+                        <button class="btn-delete" onclick="deleteRow('/manage/api/smoker/{{ s.id }}/delete/','smoker-row-{{ s.id }}')">Delete</button>
+                    </td>
+                </tr>
+                {% empty %}
+                <tr class="empty-row"><td colspan="4">No alerts yet</td></tr>
+                {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+    <!-- ═══════════════════════════════════════════════════════════════════ -->
+    <!-- 7. Passport Recognition                                            -->
+    <!-- ═══════════════════════════════════════════════════════════════════ -->
+    <div class="section-card" id="sec-passport">
+        <div class="section-header" onclick="toggleSection('sec-passport')">
+            <h2>🛂 Passport Recognition</h2>
+            <i class="chevron">▼</i>
+        </div>
+        <div class="section-body">
+            <div class="section-toolbar">
+                <button class="btn-add" onclick="openModal('passportModal')">+ Add Event</button>
+            </div>
+            <table class="data-table">
+                <thead><tr><th>#</th><th>Passport ID</th><th>Status</th><th>Message</th><th>Actions</th></tr></thead>
+                <tbody id="passportTbody">
+                {% for p in passport_events %}
+                <tr id="passport-row-{{ p.id }}">
+                    <td>{{ p.id }}</td>
+                    <td>{{ p.passport_id }}</td>
+                    <td><span class="pill pill-{{ p.status }}">{{ p.status }}</span></td>
+                    <td>{{ p.message }}</td>
+                    <td>
+                        <button class="btn-edit" onclick="editPassport({{ p.id }},'{{ p.passport_id|escapejs }}','{{ p.status }}','{{ p.message|escapejs }}')">Edit</button>
+                        <button class="btn-delete" onclick="deleteRow('/manage/api/passport/{{ p.id }}/delete/','passport-row-{{ p.id }}')">Delete</button>
+                    </td>
+                </tr>
+                {% empty %}
+                <tr class="empty-row"><td colspan="5">No events yet</td></tr>
+                {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+</main>
+
+<!-- ═══════════════════════════════════════════════════════════════════════ -->
+<!-- MODALS                                                                 -->
+<!-- ═══════════════════════════════════════════════════════════════════════ -->
+
+<!-- Cyber Threat Modal -->
+<div class="modal-backdrop" id="cyberModal">
+  <div class="modal">
+    <div class="modal-header">
+      <h3 id="cyberModalTitle">Add Cyber Threat</h3>
+      <button class="modal-close" onclick="closeModal('cyberModal')">×</button>
+    </div>
+    <div class="modal-body">
+      <div class="form-group">
+        <label>Severity</label>
+        <select id="cyberSev">
+          <option value="HIGH">HIGH</option>
+          <option value="MEDIUM">MEDIUM</option>
+          <option value="LOW">LOW</option>
+        </select>
+      </div>
+      <div class="form-group">
+        <label>Message</label>
+        <input type="text" id="cyberMsg" placeholder="Describe the threat…" />
+      </div>
+    </div>
+    <div class="modal-footer">
+      <button class="btn-cancel" onclick="closeModal('cyberModal')">Cancel</button>
+      <button class="btn-save" onclick="saveCyber()">Save</button>
+    </div>
+  </div>
+</div>
+
+<!-- IoT Device Modal -->
+<div class="modal-backdrop" id="iotModal">
+  <div class="modal">
+    <div class="modal-header">
+      <h3 id="iotModalTitle">Add IoT Device</h3>
+      <button class="modal-close" onclick="closeModal('iotModal')">×</button>
+    </div>
+    <div class="modal-body">
+      <div class="form-group">
+        <label>Device Name</label>
+        <input type="text" id="iotName" placeholder="e.g. Smart Gate T3-A" />
+      </div>
+      <div class="form-group">
+        <label>Status</label>
+        <select id="iotStatus">
+          <option value="ONLINE">ONLINE</option>
+          <option value="OFFLINE">OFFLINE</option>
+          <option value="WARNING">WARNING</option>
+        </select>
+      </div>
+    </div>
+    <div class="modal-footer">
+      <button class="btn-cancel" onclick="closeModal('iotModal')">Cancel</button>
+      <button class="btn-save" onclick="saveIot()">Save</button>
+    </div>
+  </div>
+</div>
+
+<!-- Camera Access Log Modal -->
+<div class="modal-backdrop" id="cameraModal">
+  <div class="modal">
+    <div class="modal-header">
+      <h3 id="cameraModalTitle">Add Camera Log</h3>
+      <button class="modal-close" onclick="closeModal('cameraModal')">×</button>
+    </div>
+    <div class="modal-body">
+      <div class="form-group">
+        <label>User Display</label>
+        <input type="text" id="cameraUser" placeholder="e.g. J.Doe (SKY-0001)" />
+      </div>
+      <div class="form-group">
+        <label>Action</label>
+        <select id="cameraAction">
+          <option value="Accessed">Accessed</option>
+          <option value="Ended">Ended</option>
+        </select>
+      </div>
+      <div class="form-group">
+        <label>Feed Name</label>
+        <input type="text" id="cameraFeed" placeholder="e.g. CAM 03: T2 Security" />
+      </div>
+    </div>
+    <div class="modal-footer">
+      <button class="btn-cancel" onclick="closeModal('cameraModal')">Cancel</button>
+      <button class="btn-save" onclick="saveCamera()">Save</button>
+    </div>
+  </div>
+</div>
+
+<!-- Fire Alert Modal -->
+<div class="modal-backdrop" id="fireModal">
+  <div class="modal">
+    <div class="modal-header">
+      <h3 id="fireModalTitle">Add Fire Alert</h3>
+      <button class="modal-close" onclick="closeModal('fireModal')">×</button>
+    </div>
+    <div class="modal-body">
+      <div class="form-group">
+        <label>Severity</label>
+        <select id="fireSev">
+          <option value="HIGH">HIGH</option>
+          <option value="MEDIUM">MEDIUM / WARN</option>
+          <option value="LOW">LOW / INFO</option>
+        </select>
+      </div>
+      <div class="form-group">
+        <label>Message</label>
+        <input type="text" id="fireMsg" placeholder="Describe the alert…" />
+      </div>
+    </div>
+    <div class="modal-footer">
+      <button class="btn-cancel" onclick="closeModal('fireModal')">Cancel</button>
+      <button class="btn-save" onclick="saveFire()">Save</button>
+    </div>
+  </div>
+</div>
+
+<!-- Crowded Gate Modal -->
+<div class="modal-backdrop" id="crowdModal">
+  <div class="modal">
+    <div class="modal-header">
+      <h3 id="crowdModalTitle">Add Gate Entry</h3>
+      <button class="modal-close" onclick="closeModal('crowdModal')">×</button>
+    </div>
+    <div class="modal-body">
+      <div class="form-group">
+        <label>Gate Name</label>
+        <input type="text" id="crowdGate" placeholder="e.g. Gate A1 — Terminal 1" />
+      </div>
+      <div class="form-group">
+        <label>Crowd Level</label>
+        <select id="crowdLevel">
+          <option value="CRITICAL">CRITICAL</option>
+          <option value="HIGH">HIGH</option>
+          <option value="MODERATE">MODERATE</option>
+          <option value="LOW">LOW</option>
+        </select>
+      </div>
+      <div class="form-group">
+        <label>Person Count</label>
+        <input type="number" id="crowdCount" min="0" value="0" />
+      </div>
+    </div>
+    <div class="modal-footer">
+      <button class="btn-cancel" onclick="closeModal('crowdModal')">Cancel</button>
+      <button class="btn-save" onclick="saveCrowd()">Save</button>
+    </div>
+  </div>
+</div>
+
+<!-- Smoker Alert Modal -->
+<div class="modal-backdrop" id="smokerModal">
+  <div class="modal">
+    <div class="modal-header">
+      <h3 id="smokerModalTitle">Add Smoker Alert</h3>
+      <button class="modal-close" onclick="closeModal('smokerModal')">×</button>
+    </div>
+    <div class="modal-body">
+      <div class="form-group">
+        <label>Severity</label>
+        <select id="smokerSev">
+          <option value="HIGH">ALERT (High)</option>
+          <option value="MEDIUM">WARN (Medium)</option>
+          <option value="LOW">INFO (Low)</option>
+        </select>
+      </div>
+      <div class="form-group">
+        <label>Message</label>
+        <input type="text" id="smokerMsg" placeholder="Describe the alert…" />
+      </div>
+    </div>
+    <div class="modal-footer">
+      <button class="btn-cancel" onclick="closeModal('smokerModal')">Cancel</button>
+      <button class="btn-save" onclick="saveSmoker()">Save</button>
+    </div>
+  </div>
+</div>
+
+<!-- Passport Event Modal -->
+<div class="modal-backdrop" id="passportModal">
+  <div class="modal">
+    <div class="modal-header">
+      <h3 id="passportModalTitle">Add Passport Event</h3>
+      <button class="modal-close" onclick="closeModal('passportModal')">×</button>
+    </div>
+    <div class="modal-body">
+      <div class="form-group">
+        <label>Passport ID</label>
+        <input type="text" id="passportId" placeholder="e.g. EG-0029841" />
+      </div>
+      <div class="form-group">
+        <label>Status</label>
+        <select id="passportStatus">
+          <option value="HIGH">FLAGGED</option>
+          <option value="MEDIUM">WARNING</option>
+          <option value="LOW">OK</option>
+        </select>
+      </div>
+      <div class="form-group">
+        <label>Message</label>
+        <input type="text" id="passportMsg" placeholder="Details…" />
+      </div>
+    </div>
+    <div class="modal-footer">
+      <button class="btn-cancel" onclick="closeModal('passportModal')">Cancel</button>
+      <button class="btn-save" onclick="savePassport()">Save</button>
+    </div>
+  </div>
+</div>
+
+<!-- ═══════════════════════════════════════════════════════════════════════ -->
+<!-- JAVASCRIPT                                                             -->
+<!-- ═══════════════════════════════════════════════════════════════════════ -->
+<script>
+const CSRF = '{{ csrf_token }}';
+
+/* ── Utility ─────────────────────────────────────────────────────────── */
+
+function getCsrf() { return CSRF; }
+
+async function postForm(url, data) {
+    const fd = new FormData();
+    fd.append('csrfmiddlewaretoken', getCsrf());
+    for (const [k, v] of Object.entries(data)) fd.append(k, v);
+    const r = await fetch(url, { method: 'POST', body: fd });
+    return r.json();
+}
+
+function showToast(text, type='info') {
+    const c = document.getElementById('toast-container');
+    const t = document.createElement('div');
+    t.className = 'toast' + (type==='danger' ? ' toast-danger' : type==='warn' ? ' toast-warn' : '');
+    t.innerHTML = `<span class="toast-icon">${type==='danger'?'🚨':type==='warn'?'⚠️':'✅'}</span>${text}`;
+    c.appendChild(t);
+    setTimeout(() => t.remove(), 4000);
+}
+
+/* ── Section collapse ────────────────────────────────────────────────── */
+
+function toggleSection(id) {
+    document.getElementById(id).classList.toggle('collapsed');
+}
+
+/* ── Modal helpers ───────────────────────────────────────────────────── */
+
+let _editId = {};   // stores current edit pk per section
+
+function openModal(id) { document.getElementById(id).classList.add('open'); }
+function closeModal(id) { document.getElementById(id).classList.remove('open'); }
+
+// Close modal when clicking backdrop
+document.querySelectorAll('.modal-backdrop').forEach(bd => {
+    bd.addEventListener('click', e => { if (e.target === bd) bd.classList.remove('open'); });
+});
+
+/* ── Generic row delete ──────────────────────────────────────────────── */
+
+async function deleteRow(url, rowId) {
+    if (!confirm('Delete this entry?')) return;
+    const res = await postForm(url, {});
+    if (res.success) {
+        const row = document.getElementById(rowId);
+        if (row) row.remove();
+        showToast('Entry deleted.');
+    } else {
+        showToast('Delete failed: ' + res.message, 'danger');
+    }
+}
+
+/* ── CyberThreat ─────────────────────────────────────────────────────── */
+
+function editCyber(id, sev, msg) {
+    _editId.cyber = id;
+    document.getElementById('cyberModalTitle').textContent = 'Edit Cyber Threat';
+    document.getElementById('cyberSev').value = sev;
+    document.getElementById('cyberMsg').value = msg;
+    openModal('cyberModal');
+}
+
+async function saveCyber() {
+    const sev = document.getElementById('cyberSev').value;
+    const msg = document.getElementById('cyberMsg').value.trim();
+    if (!msg) { showToast('Message is required.', 'warn'); return; }
+
+    const id = _editId.cyber;
+    const url = id ? `/manage/api/cyber/${id}/edit/` : '/manage/api/cyber/add/';
+    const res = await postForm(url, { severity: sev, message: msg });
+    if (res.success) {
+        showToast('Cyber threat saved!');
+        closeModal('cyberModal');
+        _editId.cyber = null;
+        document.getElementById('cyberModalTitle').textContent = 'Add Cyber Threat';
+        document.getElementById('cyberMsg').value = '';
+        setTimeout(() => location.reload(), 600);
+    } else {
+        showToast('Save failed.', 'danger');
+    }
+}
+
+/* ── IoTDevice ───────────────────────────────────────────────────────── */
+
+function editIot(id, name, status) {
+    _editId.iot = id;
+    document.getElementById('iotModalTitle').textContent = 'Edit IoT Device';
+    document.getElementById('iotName').value = name;
+    document.getElementById('iotStatus').value = status;
+    openModal('iotModal');
+}
+
+async function saveIot() {
+    const name   = document.getElementById('iotName').value.trim();
+    const status = document.getElementById('iotStatus').value;
+    if (!name) { showToast('Device name required.', 'warn'); return; }
+
+    const id  = _editId.iot;
+    const url = id ? `/manage/api/iot/${id}/edit/` : '/manage/api/iot/add/';
+    const res = await postForm(url, { device_name: name, status });
+    if (res.success) {
+        showToast('Device saved!');
+        closeModal('iotModal');
+        _editId.iot = null;
+        document.getElementById('iotModalTitle').textContent = 'Add IoT Device';
+        document.getElementById('iotName').value = '';
+        setTimeout(() => location.reload(), 600);
+    } else {
+        showToast('Save failed.', 'danger');
+    }
+}
+
+/* ── CameraAccessLog ─────────────────────────────────────────────────── */
+
+function editCamera(id, user, action, feed) {
+    _editId.camera = id;
+    document.getElementById('cameraModalTitle').textContent = 'Edit Camera Log';
+    document.getElementById('cameraUser').value   = user;
+    document.getElementById('cameraAction').value = action;
+    document.getElementById('cameraFeed').value   = feed;
+    openModal('cameraModal');
+}
+
+async function saveCamera() {
+    const user   = document.getElementById('cameraUser').value.trim();
+    const action = document.getElementById('cameraAction').value;
+    const feed   = document.getElementById('cameraFeed').value.trim();
+    if (!user || !feed) { showToast('User and feed are required.', 'warn'); return; }
+
+    const id  = _editId.camera;
+    const url = id ? `/manage/api/camera/${id}/edit/` : '/manage/api/camera/add/';
+    const res = await postForm(url, { user_display: user, action, feed_name: feed });
+    if (res.success) {
+        showToast('Camera log saved!');
+        closeModal('cameraModal');
+        _editId.camera = null;
+        document.getElementById('cameraModalTitle').textContent = 'Add Camera Log';
+        setTimeout(() => location.reload(), 600);
+    } else {
+        showToast('Save failed.', 'danger');
+    }
+}
+
+/* ── FireAlert ───────────────────────────────────────────────────────── */
+
+function editFire(id, sev, msg) {
+    _editId.fire = id;
+    document.getElementById('fireModalTitle').textContent = 'Edit Fire Alert';
+    document.getElementById('fireSev').value = sev;
+    document.getElementById('fireMsg').value = msg;
+    openModal('fireModal');
+}
+
+async function saveFire() {
+    const sev = document.getElementById('fireSev').value;
+    const msg = document.getElementById('fireMsg').value.trim();
+    if (!msg) { showToast('Message required.', 'warn'); return; }
+
+    const id  = _editId.fire;
+    const url = id ? `/manage/api/fire/${id}/edit/` : '/manage/api/fire/add/';
+    const res = await postForm(url, { severity: sev, message: msg });
+    if (res.success) {
+        showToast('Fire alert saved!');
+        closeModal('fireModal');
+        _editId.fire = null;
+        document.getElementById('fireModalTitle').textContent = 'Add Fire Alert';
+        document.getElementById('fireMsg').value = '';
+        setTimeout(() => location.reload(), 600);
+    } else {
+        showToast('Save failed.', 'danger');
+    }
+}
+
+/* ── CrowdedGate ─────────────────────────────────────────────────────── */
+
+function editCrowd(id, gate, level, count) {
+    _editId.crowd = id;
+    document.getElementById('crowdModalTitle').textContent = 'Edit Gate Entry';
+    document.getElementById('crowdGate').value  = gate;
+    document.getElementById('crowdLevel').value = level;
+    document.getElementById('crowdCount').value = count;
+    openModal('crowdModal');
+}
+
+async function saveCrowd() {
+    const gate  = document.getElementById('crowdGate').value.trim();
+    const level = document.getElementById('crowdLevel').value;
+    const count = document.getElementById('crowdCount').value;
+    if (!gate) { showToast('Gate name required.', 'warn'); return; }
+
+    const id  = _editId.crowd;
+    const url = id ? `/manage/api/crowd/${id}/edit/` : '/manage/api/crowd/add/';
+    const res = await postForm(url, { gate_name: gate, crowd_level: level, count });
+    if (res.success) {
+        showToast('Gate entry saved!');
+        closeModal('crowdModal');
+        _editId.crowd = null;
+        document.getElementById('crowdModalTitle').textContent = 'Add Gate Entry';
+        document.getElementById('crowdGate').value  = '';
+        document.getElementById('crowdCount').value = 0;
+        setTimeout(() => location.reload(), 600);
+    } else {
+        showToast('Save failed.', 'danger');
+    }
+}
+
+/* ── SmokerAlert ─────────────────────────────────────────────────────── */
+
+function editSmoker(id, sev, msg) {
+    _editId.smoker = id;
+    document.getElementById('smokerModalTitle').textContent = 'Edit Smoker Alert';
+    document.getElementById('smokerSev').value = sev;
+    document.getElementById('smokerMsg').value = msg;
+    openModal('smokerModal');
+}
+
+async function saveSmoker() {
+    const sev = document.getElementById('smokerSev').value;
+    const msg = document.getElementById('smokerMsg').value.trim();
+    if (!msg) { showToast('Message required.', 'warn'); return; }
+
+    const id  = _editId.smoker;
+    const url = id ? `/manage/api/smoker/${id}/edit/` : '/manage/api/smoker/add/';
+    const res = await postForm(url, { severity: sev, message: msg });
+    if (res.success) {
+        showToast('Smoker alert saved!');
+        closeModal('smokerModal');
+        _editId.smoker = null;
+        document.getElementById('smokerModalTitle').textContent = 'Add Smoker Alert';
+        document.getElementById('smokerMsg').value = '';
+        setTimeout(() => location.reload(), 600);
+    } else {
+        showToast('Save failed.', 'danger');
+    }
+}
+
+/* ── PassportEvent ───────────────────────────────────────────────────── */
+
+function editPassport(id, pid, status, msg) {
+    _editId.passport = id;
+    document.getElementById('passportModalTitle').textContent = 'Edit Passport Event';
+    document.getElementById('passportId').value     = pid;
+    document.getElementById('passportStatus').value = status;
+    document.getElementById('passportMsg').value    = msg;
+    openModal('passportModal');
+}
+
+async function savePassport() {
+    const pid    = document.getElementById('passportId').value.trim();
+    const status = document.getElementById('passportStatus').value;
+    const msg    = document.getElementById('passportMsg').value.trim();
+    if (!pid || !msg) { showToast('Passport ID and message required.', 'warn'); return; }
+
+    const id  = _editId.passport;
+    const url = id ? `/manage/api/passport/${id}/edit/` : '/manage/api/passport/add/';
+    const res = await postForm(url, { passport_id: pid, status, message: msg });
+    if (res.success) {
+        showToast('Passport event saved!');
+        closeModal('passportModal');
+        _editId.passport = null;
+        document.getElementById('passportModalTitle').textContent = 'Add Passport Event';
+        document.getElementById('passportId').value  = '';
+        document.getElementById('passportMsg').value = '';
+        setTimeout(() => location.reload(), 600);
+    } else {
+        showToast('Save failed.', 'danger');
+    }
+}
+
+/* ── Notifications bell + polling ───────────────────────────────────── */
+
+const bell       = document.getElementById('notifBell');
+const badge      = document.getElementById('notifBadge');
+const dropdown   = document.getElementById('notifDropdown');
+const notifList  = document.getElementById('notifList');
+const notifEmpty = document.getElementById('notifEmpty');
+
+let allNotifs = [];
+
+bell.addEventListener('click', e => {
+    e.stopPropagation();
+    dropdown.classList.toggle('open');
+});
+document.addEventListener('click', e => {
+    if (!dropdown.contains(e.target) && e.target !== bell) {
+        dropdown.classList.remove('open');
+    }
+});
+
+function renderNotifs() {
+    if (allNotifs.length === 0) {
+        badge.style.display = 'none';
+        notifEmpty.style.display = 'block';
+        notifList.querySelectorAll('.notif-item').forEach(n => n.remove());
+    } else {
+        badge.textContent = allNotifs.length;
+        badge.style.display = 'flex';
+        notifEmpty.style.display = 'none';
+    }
+}
+
+async function pollNotifications() {
+    try {
+        const res  = await fetch('/manage/api/notifications/');
+        const data = await res.json();
+        if (data.count > 0) {
+            data.items.forEach(item => {
+                allNotifs.push(item);
+
+                // Toast on dashboard / control panel
+                const icon = item.label.includes('Fire') ? '🔥'
+                           : item.label.includes('Smoker') ? '🚬'
+                           : item.label.includes('Passport') ? '🛂'
+                           : item.label.includes('Crowd') ? '🚶'
+                           : item.label.includes('Cyber') ? '🛡️'
+                           : '🔔';
+                showToast(`${icon} <strong>${item.label}:</strong> ${item.text}`,
+                          item.text.includes('HIGH') || item.text.includes('CRITICAL') ? 'danger' : 'warn');
+
+                // Add to dropdown
+                const el = document.createElement('div');
+                el.className = 'notif-item';
+                el.innerHTML = `<span class="tag">${item.label}</span>${item.text}`;
+                notifList.insertBefore(el, notifEmpty);
+            });
+            renderNotifs();
+        }
+    } catch(e) { /* silent */ }
+}
+
+renderNotifs();
+setInterval(pollNotifications, 5000);   // poll every 5 seconds
+pollNotifications();                    // immediate first call
+</script>
+
+</body>
+</html>

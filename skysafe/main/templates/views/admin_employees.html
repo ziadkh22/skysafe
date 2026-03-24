@@ -1,0 +1,278 @@
+{% load static %}
+<!DOCTYPE html>
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta name="description" content="SKYsafe — Employee Management" />
+    <link href="{% static 'css/admin_employees.css' %}" rel="stylesheet"/>
+    <title>SKYsafe — Employees Management</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;500;700&display=swap" rel="stylesheet">
+</head>
+<body>
+
+    <!-- ── Navbar ─────────────────────────────────────────────────── -->
+    <header class="main-header">
+        <div class="logo">SKYsafe</div>
+        <nav class="main-nav">
+            <a href="{% url 'dashboard' %}">Admin Dashboard</a>
+            <a href="{% url 'admin_employees' %}" class="active">Employees Management</a>
+        </nav>
+        <div class="user-info">
+            <span>Welcome, <strong>Admin</strong></span>
+            <a href="{% url 'admin_logout' %}" class="logout-btn">Logout</a>
+        </div>
+    </header>
+
+    <main class="em-container">
+
+        <!-- ── Flash messages ─────────────────────────────────────── -->
+        {% if messages %}
+        <div class="flash-messages">
+            {% for msg in messages %}
+            <div class="flash {{ msg.tags }}">{{ msg }}</div>
+            {% endfor %}
+        </div>
+        {% endif %}
+
+        <!-- ── Page header + search ───────────────────────────────── -->
+        <div class="em-topbar">
+            <div>
+                <h1>Employees Management</h1>
+                <p class="em-subtitle">{{ employees|length }} employee{{ employees|length|pluralize }} registered</p>
+            </div>
+            <form method="get" class="search-form">
+                <input type="text" name="q" value="{{ query }}" placeholder="Search by name, email or title…" class="search-input" id="search-input">
+                <button type="submit" class="btn-search">Search</button>
+                {% if query %}
+                <a href="{% url 'admin_employees' %}" class="btn-clear">✕ Clear</a>
+                {% endif %}
+            </form>
+        </div>
+
+        <!-- ── Employee Table ─────────────────────────────────────── -->
+        <div class="em-card">
+            {% if employees %}
+            <table class="em-table">
+                <thead>
+                    <tr>
+                        <th>ID</th>
+                        <th>Name</th>
+                        <th>Job Title</th>
+                        <th>Email</th>
+                        <th>Phone</th>
+                        <th>Warnings</th>
+                        <th>Actions</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for emp in employees %}
+                    <tr>
+                        <td class="emp-id">SKY-{{ emp.id|stringformat:"04d" }}</td>
+                        <td class="emp-name">
+                            {% if emp.photo %}
+                            <img src="{{ emp.photo.url }}" alt="" class="emp-avatar">
+                            {% else %}
+                            <span class="emp-avatar-placeholder">{{ emp.name|first|upper }}</span>
+                            {% endif %}
+                            {{ emp.name }}
+                        </td>
+                        <td>{{ emp.job_title }}</td>
+                        <td>{{ emp.email }}</td>
+                        <td>{{ emp.phone }}</td>
+                        <td>
+                            <span class="warning-count {% if emp.warnings.count > 0 %}has-warnings{% endif %}">
+                                {{ emp.warnings.count }}
+                            </span>
+                        </td>
+                        <td class="actions">
+                            <!-- Edit button triggers modal -->
+                            <button class="btn-edit"
+                                    onclick="openEditModal(
+                                        {{ emp.id }},
+                                        '{{ emp.name|escapejs }}',
+                                        '{{ emp.email|escapejs }}',
+                                        '{{ emp.phone|escapejs }}',
+                                        '{{ emp.job_title|escapejs }}',
+                                        '{{ emp.address|escapejs }}',
+                                        '{{ emp.nationality|escapejs }}',
+                                        '{{ emp.dob }}',
+                                        '{{ emp.gender|escapejs }}'
+                                    )">
+                                ✏ Edit
+                            </button>
+                            <!-- Warn button triggers modal -->
+                            <button class="btn-warn" onclick="openWarnModal({{ emp.id }}, '{{ emp.name|escapejs }}')">
+                                ⚠ Warn
+                            </button>
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+            {% else %}
+            <div class="em-empty">
+                <p>{% if query %}No employees match "<strong>{{ query }}</strong>".{% else %}No employees registered yet.{% endif %}</p>
+            </div>
+            {% endif %}
+        </div>
+
+    </main>
+
+    <!-- ──────────────────────────────────────────────────────────────
+         EDIT EMPLOYEE MODAL
+    ────────────────────────────────────────────────────────────────── -->
+    <div id="editModal" class="modal-overlay" onclick="closeModal('editModal')">
+        <div class="modal-box" onclick="event.stopPropagation()">
+            <div class="modal-header">
+                <h2>Edit Employee</h2>
+                <button class="modal-close" onclick="closeModal('editModal')">✕</button>
+            </div>
+            <form id="editForm" method="post" action="">
+                {% csrf_token %}
+                <div class="form-grid">
+                    <div class="form-group">
+                        <label for="edit-name">Full Name</label>
+                        <input type="text" id="edit-name" name="name" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="edit-email">Email</label>
+                        <input type="email" id="edit-email" name="email" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="edit-phone">Phone</label>
+                        <input type="text" id="edit-phone" name="phone">
+                    </div>
+                    <div class="form-group">
+                        <label for="edit-job-title">Job Title</label>
+                        <input type="text" id="edit-job-title" name="job_title">
+                    </div>
+                    <div class="form-group">
+                        <label for="edit-gender">Gender</label>
+                        <select id="edit-gender" name="gender">
+                            <option value="Male">Male</option>
+                            <option value="Female">Female</option>
+                            <option value="Other">Other</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label for="edit-dob">Date of Birth</label>
+                        <input type="date" id="edit-dob" name="dob">
+                    </div>
+                    <div class="form-group full-width">
+                        <label for="edit-nationality">Nationality</label>
+                        <input type="text" id="edit-nationality" name="nationality">
+                    </div>
+                    <div class="form-group full-width">
+                        <label for="edit-address">Address</label>
+                        <input type="text" id="edit-address" name="address">
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn-cancel" onclick="closeModal('editModal')">Cancel</button>
+                    <button type="submit" class="btn-save">Save Changes</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- ──────────────────────────────────────────────────────────────
+         SEND WARNING MODAL
+    ────────────────────────────────────────────────────────────────── -->
+    <div id="warnModal" class="modal-overlay" onclick="closeModal('warnModal')">
+        <div class="modal-box" onclick="event.stopPropagation()">
+            <div class="modal-header">
+                <h2>Send Warning / Notice</h2>
+                <button class="modal-close" onclick="closeModal('warnModal')">✕</button>
+            </div>
+            <form id="warnForm" method="post" action="">
+                {% csrf_token %}
+                <p class="warn-target">Sending to: <strong id="warnTargetName"></strong></p>
+                <div class="form-group">
+                    <label for="warn-priority">Priority</label>
+                    <select id="warn-priority" name="priority">
+                        <option value="high">🔴 High Priority</option>
+                        <option value="normal" selected>🔵 Normal</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label for="warn-title">Title</label>
+                    <input type="text" id="warn-title" name="title" placeholder="e.g. Mandatory Security Briefing" required>
+                </div>
+                <div class="form-group">
+                    <label for="warn-message">Message</label>
+                    <textarea id="warn-message" name="message" rows="4" placeholder="Write the full message here…" required></textarea>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn-cancel" onclick="closeModal('warnModal')">Cancel</button>
+                    <button type="submit" class="btn-warn-send">Send Warning</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- ── Auto-open modal if edit_employee passed from backend ───── -->
+    {% if edit_employee %}
+    <script>
+    document.addEventListener('DOMContentLoaded', function() {
+        openEditModal(
+            {{ edit_employee.id }},
+            '{{ edit_employee.name|escapejs }}',
+            '{{ edit_employee.email|escapejs }}',
+            '{{ edit_employee.phone|escapejs }}',
+            '{{ edit_employee.job_title|escapejs }}',
+            '{{ edit_employee.address|escapejs }}',
+            '{{ edit_employee.nationality|escapejs }}',
+            '{{ edit_employee.dob }}',
+            '{{ edit_employee.gender|escapejs }}'
+        );
+    });
+    </script>
+    {% endif %}
+
+    <script>
+    function openEditModal(id, name, email, phone, jobTitle, address, nationality, dob, gender) {
+        document.getElementById('editForm').action = '/manage/employees/' + id + '/edit/';
+        document.getElementById('edit-name').value        = name;
+        document.getElementById('edit-email').value       = email;
+        document.getElementById('edit-phone').value       = phone;
+        document.getElementById('edit-job-title').value   = jobTitle;
+        document.getElementById('edit-address').value     = address;
+        document.getElementById('edit-nationality').value = nationality;
+        document.getElementById('edit-dob').value         = dob;
+        document.getElementById('edit-gender').value      = gender;
+        document.getElementById('editModal').classList.add('open');
+    }
+
+    function openWarnModal(id, name) {
+        document.getElementById('warnForm').action = '/manage/employees/' + id + '/warn/';
+        document.getElementById('warnTargetName').textContent = name;
+        document.getElementById('warn-title').value   = '';
+        document.getElementById('warn-message').value = '';
+        document.getElementById('warnModal').classList.add('open');
+    }
+
+    function closeModal(id) {
+        document.getElementById(id).classList.remove('open');
+    }
+
+    // Close on Escape key
+    document.addEventListener('keydown', function(e) {
+        if (e.key === 'Escape') {
+            closeModal('editModal');
+            closeModal('warnModal');
+        }
+    });
+
+    // Auto-dismiss flash messages after 4s
+    setTimeout(function() {
+        document.querySelectorAll('.flash').forEach(function(el) {
+            el.style.opacity = '0';
+            setTimeout(function() { el.remove(); }, 400);
+        });
+    }, 4000);
+    </script>
+
+</body>
+</html>

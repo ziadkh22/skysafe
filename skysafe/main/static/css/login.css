@@ -1,0 +1,192 @@
+:root {
+    --primary-blue: #000000;
+    --light-blue: #e6f2ff;
+    --dark-blue: #000000;
+    --background-color: #f4f7f9;
+    --form-background: #ffffff;
+    --text-color: #333;
+    --label-color: #555;
+    --border-color: #ced4da;
+    --shadow-color: rgba(0, 123, 255, 0.15);
+}
+
+body {
+    font-family: 'Roboto', sans-serif;
+    background-color: var(--background-color);
+    color: var(--text-color);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    min-height: 100vh;
+    padding: 2rem 1rem;
+    box-sizing: border-box;
+}
+
+/* --- FORM WRAPPER & MAIN STYLES --- */
+.form-wrapper {
+    background-color: var(--form-background);
+    width: 100%;
+    max-width: 450px;
+    /* Set for login page */
+    padding: 2.5rem;
+    border-radius: 12px;
+    box-shadow: 0 8px 30px rgba(0, 0, 0, 0.08);
+}
+
+.skysafe-form h2 {
+    color: var(--primary-blue);
+    text-align: center;
+    margin-bottom: 0.5rem;
+    font-weight: 700;
+}
+
+.skysafe-form p {
+    text-align: center;
+    margin-bottom: 2rem;
+    color: var(--label-color);
+}
+
+/* --- FORM GROUPS, LABELS, & INPUTS --- */
+.form-group {
+    margin-bottom: 1.25rem;
+}
+
+.form-group label {
+    display: block;
+    margin-bottom: 0.5rem;
+    font-weight: 500;
+    color: var(--label-color);
+    font-size: 0.9rem;
+}
+
+input[type="text"],
+input[type="email"],
+input[type="tel"],
+input[type="date"],
+input[type="password"],
+select {
+    width: 100%;
+    padding: 0.75rem 1rem;
+    border: 1px solid var(--border-color);
+    border-radius: 8px;
+    font-size: 1rem;
+    font-family: inherit;
+    background-color: #fff;
+    transition: border-color 0.2s ease, box-shadow 0.2s ease;
+}
+
+/* --- INTERACTIVE FOCUS STATE --- */
+input:focus,
+select:focus {
+    outline: none;
+    border-color: var(--primary-blue);
+    box-shadow: 0 0 0 3px var(--shadow-color);
+}
+
+/* --- SUBMIT BUTTON --- */
+button[type="submit"] {
+    width: 100%;
+    padding: 0.85rem;
+    background-color: var(--primary-blue);
+    color: white;
+    border: none;
+    border-radius: 8px;
+    font-size: 1.1rem;
+    font-weight: 700;
+    cursor: pointer;
+    transition: background-color 0.2s ease, transform 0.2s ease;
+}
+
+button[type="submit"]:hover {
+    background-color: var(--dark-blue);
+    transform: translateY(-2px);
+}
+
+/* --- STYLES FOR LOGIN PAGE OPTIONS --- */
+
+.form-options {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 1.5rem;
+    gap: 1rem;
+}
+
+.checkbox-group {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+}
+
+.checkbox-group label {
+    margin-bottom: 0;
+    font-weight: 400;
+    font-size: 0.9rem;
+    color: var(--label-color);
+    cursor: pointer;
+}
+
+.checkbox-group input[type="checkbox"] {
+    accent-color: var(--primary-blue);
+}
+
+.forgot-password {
+    font-size: 0.9rem;
+    color: var(--primary-blue);
+    text-decoration: none;
+    font-weight: 500;
+    transition: color 0.2s ease;
+}
+
+.forgot-password:hover {
+    color: var(--dark-blue);
+    text-decoration: underline;
+}
+
+.switch-form-link {
+    text-align: center;
+    margin-top: 1.5rem;
+    font-size: 0.9rem;
+    color: var(--label-color);
+}
+
+.switch-form-link a {
+    color: var(--primary-blue);
+    text-decoration: none;
+    font-weight: 500;
+}
+
+.switch-form-link a:hover {
+    color: var(--dark-blue);
+    text-decoration: underline;
+}
+
+
+/* --- ALERT MESSAGES --- */
+.alert {
+    padding: 0.75rem 1rem;
+    border-radius: 8px;
+    margin-bottom: 1.25rem;
+    font-size: 0.9rem;
+    font-weight: 500;
+    text-align: center;
+}
+
+.alert-error {
+    background-color: #fdecea;
+    color: #c0392b;
+    border: 1px solid #f5c6cb;
+}
+
+.alert-success {
+    background-color: #eafaf1;
+    color: #1e8449;
+    border: 1px solid #a9dfbf;
+}
+
+/* --- RESPONSIVE STYLES --- */
+@media (max-width: 600px) {
+    .form-wrapper {
+        padding: 1.5rem;
+    }
+}

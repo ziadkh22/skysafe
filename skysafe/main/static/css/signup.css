@@ -1,0 +1,173 @@
+/* ---  GLOBAL STYLES & VARIABLES --- */
+:root {
+    --primary-blue: #007bff;
+    --light-blue: #e6f2ff;
+    --dark-blue: #0056b3;
+    --background-color: #f4f7f9;
+    --form-background: #ffffff;
+    --text-color: #333;
+    --label-color: #555;
+    --border-color: #ced4da;
+    --shadow-color: rgba(0, 123, 255, 0.15);
+}
+
+body {
+    font-family: 'Roboto', sans-serif;
+    background-color: var(--background-color);
+    color: var(--text-color);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    min-height: 100vh;
+    padding: 2rem 1rem;
+    box-sizing: border-box;
+}
+
+/* --- FORM WRAPPER & MAIN STYLES --- */
+.form-wrapper {
+    background-color: var(--form-background);
+    width: 100%;
+    max-width: 650px;
+    padding: 2.5rem;
+    border-radius: 12px;
+    box-shadow: 0 8px 30px rgba(0, 0, 0, 0.08);
+}
+
+.skysafe-form h2 {
+    color: black;
+    text-align: center;
+    margin-bottom: 0.5rem;
+    font-weight: 700;
+}
+
+.skysafe-form p {
+    text-align: center;
+    margin-bottom: 2rem;
+    color: var(--label-color);
+}
+
+/* --- FORM GROUPS, LABELS, & INPUTS --- */
+.form-group {
+    margin-bottom: 1.25rem;
+}
+
+.form-group label {
+    display: block;
+    margin-bottom: 0.5rem;
+    font-weight: 500;
+    color: var(--label-color);
+    font-size: 0.9rem;
+}
+
+input[type="text"],
+input[type="email"],
+input[type="tel"],
+input[type="date"],
+input[type="password"],
+select {
+    width: 100%;
+    padding: 0.75rem 1rem;
+    border: 1px solid var(--border-color);
+    border-radius: 8px;
+    font-size: 1rem;
+    font-family: inherit;
+    background-color: #fff;
+    transition: border-color 0.2s ease, box-shadow 0.2s ease;
+}
+
+/* --- INTERACTIVE FOCUS STATE --- */
+input:focus,
+select:focus {
+    outline: none;
+    border-color: var(--primary-blue);
+    box-shadow: 0 0 0 3px var(--shadow-color);
+}
+
+/* --- TWO-COLUMN LAYOUT FOR CITY/NATIONALITY --- */
+.form-row {
+    display: flex;
+    gap: 1.5rem;
+}
+
+.form-row .form-group {
+    flex: 1;
+    /* Each group takes up equal space */
+}
+
+/* --- GENDER RADIO BUTTONS --- */
+.radio-container {
+    display: flex;
+    align-items: center;
+    gap: 1.5rem;
+    padding: 0.5rem 0;
+}
+
+.radio-container input[type="radio"] {
+    accent-color: var(--primary-blue);
+}
+
+.radio-container label {
+    margin-bottom: 0;
+    font-weight: 400;
+    cursor: pointer;
+}
+
+/* --- STYLING THE FILE INPUT --- */
+input[type="file"] {
+    font-size: 0.9rem;
+}
+
+/* Modern browser styling for file input button */
+input[type="file"]::file-selector-button {
+    background-color: #ddd;
+    color: black;
+    border: 1px solid #ddd;
+    border-radius: 6px;
+    padding: 0.5rem 1rem;
+    font-weight: 500;
+    cursor: pointer;
+    transition: background-color 0.2s ease;
+}
+
+input[type="file"]::file-selector-button:hover {
+    background-color: #eeeeee;
+}
+
+/* --- DIVIDER --- */
+.divider {
+    border: none;
+    border-top: 1px solid #eee;
+    margin: 2rem 0;
+}
+
+/* --- SUBMIT BUTTON --- */
+button[type="submit"] {
+    width: 100%;
+    padding: 0.85rem;
+    background-color: black;
+    color: white;
+    border: none;
+    border-radius: 8px;
+    font-size: 1.1rem;
+    font-weight: 700;
+    cursor: pointer;
+    transition: background-color 0.2s ease, transform 0.2s ease;
+}
+
+button[type="submit"]:hover {
+    background-color: #ddd;
+    color: black;
+    transform: translateY(-2px);
+}
+
+/* --- RESPONSIVE STYLES --- */
+@media (max-width: 600px) {
+    .form-wrapper {
+        padding: 1.5rem;
+    }
+
+    .form-row {
+        flex-direction: column;
+        gap: 0;
+    }
+}

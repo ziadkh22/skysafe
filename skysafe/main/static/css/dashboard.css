@@ -1,0 +1,489 @@
+/* ---  GLOBAL STYLES & VARIABLES (From other CSS files) --- */
+:root {
+    --primary-blue: #007bff;
+    --light-blue: #e6f2ff;
+    --dark-blue: #0056b3;
+    --background-color: #f4f7f9;
+    --form-background: #ffffff;
+    --text-color: #333;
+    --label-color: #555;
+    --border-color: #ced4da;
+    --shadow-color: rgba(0, 123, 255, 0.15);
+    --danger-red: #e74c3c;
+    --danger-red-light: #fdeded;
+    --success-green: #2ecc71;
+    --warning-orange: #f39c12;
+}
+
+body {
+    font-family: 'Roboto', sans-serif;
+    background-color: var(--background-color);
+    color: var(--text-color);
+    margin: 0;
+    padding: 0;
+}
+
+/* --- Main Header / Navbar (Consistent) --- */
+.main-header {
+    background-color: var(--form-background);
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
+    padding: 1rem 2.5rem;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    position: sticky;
+    top: 0;
+    z-index: 1000;
+}
+
+.logo {
+    font-size: 1.75rem;
+    font-weight: 700;
+    color: var(--primary-blue);
+    cursor: pointer;
+}
+
+.main-nav {
+    display: flex;
+    gap: 2rem;
+}
+
+.main-nav a {
+    text-decoration: none;
+    color: var(--label-color);
+    font-weight: 500;
+    padding-bottom: 0.5rem;
+    border-bottom: 3px solid transparent;
+    transition: color 0.2s ease, border-color 0.2s ease;
+}
+
+.main-nav a:hover {
+    color: var(--primary-blue);
+}
+
+.main-nav a.active {
+    color: var(--primary-blue);
+    border-bottom-color: var(--primary-blue);
+}
+
+.user-info {
+    display: flex;
+    align-items: center;
+    gap: 1.5rem;
+}
+
+.user-info span {
+    color: var(--text-color);
+    font-size: 0.9rem;
+}
+
+.logout-btn {
+    background-color: var(--light-blue);
+    color: var(--primary-blue);
+    border: 1px solid var(--primary-blue);
+    padding: 0.5rem 1rem;
+    border-radius: 6px;
+    text-decoration: none;
+    font-weight: 500;
+    font-size: 0.9rem;
+    transition: background-color 0.2s ease, color 0.2s ease;
+}
+
+.logout-btn:hover {
+    background-color: var(--primary-blue);
+    color: white;
+}
+
+/* --- Dashboard Container --- */
+.dashboard-container {
+    padding: 2.5rem;
+}
+
+/* --- Top Stats Bar --- */
+.stats-bar {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+    gap: 1.5rem;
+    margin-bottom: 2rem;
+}
+
+.stat-card {
+    background-color: var(--form-background);
+    border-radius: 12px;
+    box-shadow: 0 8px 30px rgba(0, 0, 0, 0.07);
+    padding: 1.5rem;
+    display: flex;
+    align-items: center;
+    gap: 1.5rem;
+}
+
+.stat-icon {
+    width: 60px;
+    height: 60px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.stat-icon svg {
+    width: 28px;
+    height: 28px;
+    color: white;
+}
+
+/* Icon Colors */
+.stat-icon.threat {
+    background-color: var(--danger-red);
+}
+
+.stat-icon.iot {
+    background-color: var(--primary-blue);
+}
+
+.stat-icon.camera {
+    background-color: var(--warning-orange);
+}
+
+.stat-info label {
+    font-size: 0.9rem;
+    color: var(--label-color);
+    margin-bottom: 0.25rem;
+    display: block;
+}
+
+.stat-info .value {
+    font-size: 1.75rem;
+    font-weight: 700;
+    color: var(--text-color);
+}
+
+.stat-info .high-priority-text {
+    color: var(--danger-red);
+}
+
+/* --- Main Dashboard Grid --- */
+.dashboard-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 2rem;
+    align-items: start;
+    /* cards only as tall as their content */
+}
+
+/* --- Base Card Style --- */
+.card {
+    background-color: var(--form-background);
+    border-radius: 12px;
+    box-shadow: 0 8px 30px rgba(0, 0, 0, 0.07);
+    padding: 2rem;
+}
+
+.card h2 {
+    color: var(--primary-blue);
+    margin-top: 0;
+    margin-bottom: 1.5rem;
+    padding-bottom: 1rem;
+    border-bottom: 1px solid #eee;
+}
+
+/* --- Card 1: Live Stream --- */
+.live-stream-card {
+    grid-column: 1 / -1;
+    /* Span all columns */
+}
+
+.stream-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+    gap: 1rem;
+}
+
+.video-feed {
+    position: relative;
+    border-radius: 8px;
+    overflow: hidden;
+    background-color: #000;
+}
+
+.video-feed img {
+    width: 100%;
+    display: block;
+    opacity: 0.8;
+}
+
+.feed-label {
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    width: 100%;
+    background: linear-gradient(to top, rgba(0, 0, 0, 0.8), transparent);
+    color: white;
+    padding: 1.5rem 1rem 0.75rem;
+    font-size: 0.9rem;
+    font-weight: 500;
+    box-sizing: border-box;
+}
+
+/* --- Cards 2 & 4: Log Feeds --- */
+.cyber-threats-card {
+    grid-column: span 2;
+    /* Take 2/3 width */
+}
+
+.access-log-card {
+    grid-column: span 1;
+    /* Take 1/3 width */
+}
+
+.fire-detection-card {
+    grid-column: span 2;
+    /* Take 2/3 width — sits beside access-log-card */
+}
+
+/* --- Card 6: Crowded Gate Detection --- */
+.crowded-gate-card {
+    grid-column: span 1;
+}
+
+/* Row-level colors keyed to the data-crowd attribute on each <li> */
+.crowded-gate-card .device-item[data-crowd="CRITICAL"] {
+    background-color: #fff0f0 !important;
+    border-left: 4px solid var(--danger-red) !important;
+    padding-left: 0.75rem;
+    border-radius: 6px;
+}
+
+.crowded-gate-card .device-item[data-crowd="HIGH"] {
+    background-color: #fff8ec !important;
+    border-left: 4px solid var(--warning-orange) !important;
+    padding-left: 0.75rem;
+    border-radius: 6px;
+}
+
+.crowded-gate-card .device-item[data-crowd="MODERATE"] {
+    background-color: #f0faf2 !important;
+    border-left: 4px solid #27ae60 !important;
+    padding-left: 0.75rem;
+    border-radius: 6px;
+}
+
+.crowded-gate-card .device-item[data-crowd="LOW"] {
+    background-color: #edf5ff !important;
+    border-left: 4px solid var(--primary-blue) !important;
+    padding-left: 0.75rem;
+    border-radius: 6px;
+}
+
+/* Crowd-level badge pill */
+.crowd-badge {
+    display: inline-block;
+    padding: 0.25rem 0.7rem;
+    border-radius: 20px;
+    font-size: 0.8rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.04em;
+}
+
+.crowd-badge[data-crowd="CRITICAL"] {
+    background-color: #fde8e8;
+    color: var(--danger-red);
+}
+
+.crowd-badge[data-crowd="HIGH"] {
+    background-color: #fff3e0;
+    color: var(--warning-orange);
+}
+
+.crowd-badge[data-crowd="MODERATE"] {
+    background-color: #e8f5e9;
+    color: #27ae60;
+}
+
+.crowd-badge[data-crowd="LOW"] {
+    background-color: #e6f2ff;
+    color: var(--primary-blue);
+}
+
+/* --- Card 7: Smoker Detection --- */
+.smoker-detection-card {
+    grid-column: span 2;
+}
+
+/* --- Card 8: Passport Recognition --- */
+.passport-recognition-card {
+    grid-column: span 1;
+}
+
+.log-feed {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+    /* No fixed max-height — grows with content */
+    font-size: 0.9rem;
+}
+
+.log-item {
+    display: flex;
+    gap: 1rem;
+    padding: 0.75rem 0.5rem;
+    border-bottom: 1px solid #f0f0f0;
+    align-items: center;
+}
+
+.log-item:last-child {
+    border-bottom: none;
+}
+
+.log-item .timestamp {
+    flex-basis: 120px;
+    color: var(--label-color);
+}
+
+.log-item .severity {
+    flex-basis: 70px;
+    font-weight: 700;
+    text-transform: uppercase;
+}
+
+.log-item .user {
+    color: var(--label-color);
+}
+
+.log-item .message {
+    flex: 1;
+}
+
+/* Log Severity Colors */
+.severity[data-severity="HIGH"] {
+    color: var(--danger-red);
+}
+
+.severity[data-severity="MEDIUM"] {
+    color: var(--warning-orange);
+}
+
+.severity[data-severity="LOW"] {
+    color: var(--label-color);
+}
+
+/* --- Card 3: IoT Status --- */
+.iot-status-card {
+    grid-column: span 1;
+    /* Take 1/3 width */
+    /* No fixed max-height — grows with content */
+}
+
+.device-list {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+    /* No fixed max-height — grows with content */
+}
+
+.device-item {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 1rem 0.5rem;
+    border-bottom: 1px solid #f0f0f0;
+}
+
+.device-item:last-child {
+    border-bottom: none;
+}
+
+.device-item .status-dot {
+    display: flex;
+    align-items: center;
+    font-weight: 700;
+    font-size: 0.9rem;
+}
+
+.device-item .status-dot::before {
+    content: '';
+    width: 10px;
+    height: 10px;
+    border-radius: 50%;
+    margin-right: 0.5rem;
+}
+
+/* Status Dot Colors */
+.status-dot[data-status="ONLINE"] {
+    color: var(--success-green);
+}
+
+.status-dot[data-status="ONLINE"]::before {
+    background-color: var(--success-green);
+}
+
+.status-dot[data-status="OFFLINE"] {
+    color: var(--danger-red);
+}
+
+.status-dot[data-status="OFFLINE"]::before {
+    background-color: var(--danger-red);
+}
+
+.status-dot[data-status="WARNING"] {
+    color: var(--warning-orange);
+}
+
+.status-dot[data-status="WARNING"]::before {
+    background-color: var(--warning-orange);
+}
+
+
+/* --- Responsive Design --- */
+@media (max-width: 1200px) {
+
+    /* Stack grid to 2 columns */
+    .dashboard-grid {
+        grid-template-columns: 1fr 1fr;
+    }
+
+    .cyber-threats-card {
+        grid-column: span 1;
+    }
+
+
+    .access-log-card {
+        grid-column: span 1;
+    }
+}
+
+@media (max-width: 768px) {
+
+    /* Stack everything to 1 column */
+    .stats-bar,
+    .dashboard-grid {
+        grid-template-columns: 1fr;
+    }
+
+    /* Copied from employee dashboard for consistent header response */
+    .main-header {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 1rem;
+        padding: 1.5rem;
+    }
+
+    .main-nav {
+        gap: 1rem;
+        flex-wrap: wrap;
+    }
+
+    .user-info {
+        width: 100%;
+        justify-content: space-between;
+    }
+
+    .dashboard-container {
+        padding: 1.5rem;
+    }
+
+    .card {
+        padding: 1.5rem;
+    }
+}
